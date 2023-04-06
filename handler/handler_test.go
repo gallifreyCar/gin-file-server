@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"bufio"
 	"bytes"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -62,12 +61,13 @@ func TestUploadFileSingle(t *testing.T) {
 		cleanup()
 		t.Fatal(err)
 	}
-
+	// Create a test router
 	router := setupRouter()
 	// Create a response recorder to record the response
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/uploadFile", body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
+	//Serve the request using the test router
 	router.ServeHTTP(w, req)
 
 	// Check the response status code
@@ -140,23 +140,4 @@ func TestUploadFiles(t *testing.T) {
 		return
 	}
 
-}
-func TestFileRead(t *testing.T) {
-	file, err := os.Open("../target/example1360617868.txt")
-	if err != nil {
-		// 处理打开文件失败的错误
-		t.Errorf("%v", err)
-		return
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		t.Log("content: " + scanner.Text())
-	}
-	if err := scanner.Err(); err != nil {
-		// 处理读取文件内容失败的错误
-		t.Errorf("%v", err)
-		return
-	}
 }

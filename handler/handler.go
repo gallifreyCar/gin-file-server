@@ -15,7 +15,7 @@ func uploadFileSingle(c *gin.Context) {
 	file, _ := c.FormFile(fieldName)
 	log.Println(file.Filename)
 
-	dst := "../target/" + file.Filename
+	dst := "../target/single/" + file.Filename
 	// Save the uploaded file to the specified directory
 	c.SaveUploadedFile(file, dst)
 
@@ -37,7 +37,7 @@ func uploadFiles(c *gin.Context) {
 	for _, file := range files {
 		log.Println(file.Filename)
 
-		dst := "../target/" + file.Filename
+		dst := "../target/multiple/" + file.Filename
 		// Save the uploaded file to the specified directory
 		c.SaveUploadedFile(file, dst)
 	}
