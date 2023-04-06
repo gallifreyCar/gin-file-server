@@ -6,6 +6,7 @@ import (
 	"log"
 	"mime"
 	"net/http"
+	"os"
 	"path"
 )
 
@@ -17,7 +18,7 @@ func uploadFileSingle(c *gin.Context) {
 	file, _ := c.FormFile(fieldName)
 	log.Println(file.Filename)
 
-	dst := "../target/single/" + file.Filename
+	dst := "../target/upload/single/" + file.Filename
 	// Save the uploaded file to the specified directory
 	err := c.SaveUploadedFile(file, dst)
 	if err != nil {
@@ -42,7 +43,7 @@ func uploadFiles(c *gin.Context) {
 	for _, file := range files {
 		log.Println(file.Filename)
 
-		dst := "../target/multiple/" + file.Filename
+		dst := "../target/upload/multiple/" + file.Filename
 		// Save the uploaded file to the specified directory
 		err := c.SaveUploadedFile(file, dst)
 		if err != nil {
@@ -53,10 +54,21 @@ func uploadFiles(c *gin.Context) {
 }
 
 func downloadFile(c *gin.Context) {
+	// Get url param
 	folder := c.Param("folder")
 	fileName := c.Param("file_name")
-	filePath := path.Join("..", "target", folder, fileName)
+	baseUrl := path.Join("..", "target", "upload")
+	// Build local filePath
+	filePath := path.Join(baseUrl, folder, fileName)
+	// Check the files is existence or not
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		// if file is not existence , return 404
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "file not found"})
+		return
+	}
+	// Get ext
 	ext := path.Ext(filePath)
+	// Set response Header
 	c.Header("Content-Type", mime.TypeByExtension(ext))
 	c.Header("Content-Disposition", "attachment; filename="+fileName)
 	c.Status(http.StatusOK)

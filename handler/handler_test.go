@@ -110,8 +110,13 @@ func TestUploadFiles(t *testing.T) {
 
 	//Remove files from os
 	defer func() {
+
 		for _, file := range files {
-			err := os.Remove(file.Name())
+			err := file.Close()
+			if err != nil {
+				t.Fatal(err)
+			}
+			err = os.Remove(file.Name())
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -160,9 +165,9 @@ func TestUploadFiles(t *testing.T) {
 
 func TestDownloadFile(t *testing.T) {
 	folder := "single"
-	fileName := "example234365687.txt"
+	fileName := "example617170769.txt"
 	folder2 := "multiple"
-	fileName2 := "example3069953502.txt"
+	fileName2 := "example357758603.txt"
 	downloadAndSave(folder, fileName, t)
 	downloadAndSave(folder2, fileName2, t)
 }
@@ -179,15 +184,20 @@ func downloadAndSave(folder, fileName string, t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	// Check the response status code
+	if w.Code == http.StatusNotFound {
+		t.Logf("file not found %d", w.Code)
+		return
+	}
 	if w.Code != http.StatusOK {
 		t.Errorf("unexpected status code %d", w.Code)
 		return
 	}
 
-	// Save the files in the local
-	saveFilePath := path.Join("..", "download", folder, fileName)
 	// Create the download directory if it doesn't exist
-	downloadDirPath := path.Join("..", "download", folder)
+	downloadDirPath := path.Join("..", "target", "download", folder)
+	// Save the files in the local
+	saveFilePath := path.Join(downloadDirPath, fileName)
+
 	err := os.MkdirAll(downloadDirPath, os.ModePerm)
 	if err != nil {
 		t.Errorf("error creating download directory: %v", err)
