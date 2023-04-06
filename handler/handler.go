@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
+	"mime"
 	"net/http"
+	"path"
 )
 
 func uploadFileSingle(c *gin.Context) {
@@ -48,4 +50,15 @@ func uploadFiles(c *gin.Context) {
 		}
 	}
 	c.String(http.StatusOK, fmt.Sprintf("%d files uploaded!", len(files)))
+}
+
+func downloadFile(c *gin.Context) {
+	folder := c.Param("folder")
+	fileName := c.Param("file_name")
+	filePath := path.Join("..", "target", folder, fileName)
+	ext := path.Ext(filePath)
+	c.Header("Content-Type", mime.TypeByExtension(ext))
+	c.Header("Content-Disposition", "attachment; filename="+fileName)
+	c.Status(http.StatusOK)
+	c.File(filePath)
 }

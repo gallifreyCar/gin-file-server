@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"testing"
 )
@@ -18,6 +19,7 @@ func setupRouter() *gin.Engine {
 	r := gin.Default()
 	r.POST("/uploadFile", uploadFileSingle)
 	r.POST("/uploadFiles", uploadFiles)
+	r.GET("/downloadFile/:folder/:file_name", downloadFile)
 	return r
 }
 
@@ -151,6 +153,59 @@ func TestUploadFiles(t *testing.T) {
 	// Check the response status code
 	if w.Code != http.StatusOK {
 		t.Errorf("unexpected status code %d", w.Code)
+		return
+	}
+
+}
+
+func TestDownloadFile(t *testing.T) {
+	folder := "single"
+	fileName := "example234365687.txt"
+	folder2 := "multiple"
+	fileName2 := "example3069953502.txt"
+	downloadAndSave(folder, fileName, t)
+	downloadAndSave(folder2, fileName2, t)
+}
+
+func downloadAndSave(folder, fileName string, t *testing.T) {
+	// Create a test router
+	router := setupRouter()
+	// Create a response recorder to record the response
+	w := httptest.NewRecorder()
+	requestUrl := path.Join("/downloadFile", folder, fileName)
+	req, _ := http.NewRequest("GET", requestUrl, nil)
+
+	// Serve the request using the test router
+	router.ServeHTTP(w, req)
+
+	// Check the response status code
+	if w.Code != http.StatusOK {
+		t.Errorf("unexpected status code %d", w.Code)
+		return
+	}
+
+	// Save the files in the local
+	saveFilePath := path.Join("..", "download", folder, fileName)
+	// Create the download directory if it doesn't exist
+	downloadDirPath := path.Join("..", "download", folder)
+	err := os.MkdirAll(downloadDirPath, os.ModePerm)
+	if err != nil {
+		t.Errorf("error creating download directory: %v", err)
+		return
+	}
+
+	// Create a new file to save the downloaded content
+	out, err := os.Create(saveFilePath)
+	if err != nil {
+		t.Errorf("error creating file: %v", err)
+		return
+	}
+	defer out.Close()
+
+	// Write the downloaded content to the new file
+	_, err = io.Copy(out, w.Body)
+	if err != nil {
+		t.Errorf("error writing file: %v", err)
 		return
 	}
 
