@@ -200,7 +200,12 @@ func downloadAndSave(folder, fileName string, t *testing.T) {
 		t.Errorf("error creating file: %v", err)
 		return
 	}
-	defer out.Close()
+	defer func() {
+		err = out.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
 
 	// Write the downloaded content to the new file
 	_, err = io.Copy(out, w.Body)
