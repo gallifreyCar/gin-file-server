@@ -28,12 +28,19 @@ func TestUploadFileSingle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer file.Close()
+	defer func() {
+		err = file.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}()
+
 	// Write some data to the file
-	file.WriteString("testing file upload")
-	if err := file.Sync(); err != nil {
+	_, err = file.WriteString("testing file upload")
+	if err != nil {
 		t.Fatal(err)
 	}
+
 	// Create a new request with the file as the body of the request
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)

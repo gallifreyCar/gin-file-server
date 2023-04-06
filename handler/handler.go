@@ -17,7 +17,10 @@ func uploadFileSingle(c *gin.Context) {
 
 	dst := "../target/single/" + file.Filename
 	// Save the uploaded file to the specified directory
-	c.SaveUploadedFile(file, dst)
+	err := c.SaveUploadedFile(file, dst)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
 }
@@ -39,7 +42,10 @@ func uploadFiles(c *gin.Context) {
 
 		dst := "../target/multiple/" + file.Filename
 		// Save the uploaded file to the specified directory
-		c.SaveUploadedFile(file, dst)
+		err := c.SaveUploadedFile(file, dst)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 	c.String(http.StatusOK, fmt.Sprintf("%d files uploaded!", len(files)))
 }
