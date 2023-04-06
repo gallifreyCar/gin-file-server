@@ -17,9 +17,9 @@ import (
 
 func setupRouter() *gin.Engine {
 	r := gin.Default()
-	r.POST("/uploadFile", uploadFileSingle)
-	r.POST("/uploadFiles", uploadFiles)
-	r.GET("/downloadFile/:folder/:file_name", downloadFile)
+	r.POST("/uploadFile", UploadFileSingle)
+	r.POST("/UploadFiles", UploadFiles)
+	r.GET("/DownloadFile/:folder/:file_name", DownloadFile)
 	return r
 }
 
@@ -177,7 +177,7 @@ func downloadAndSave(folder, fileName string, t *testing.T) {
 	router := setupRouter()
 	// Create a response recorder to record the response
 	w := httptest.NewRecorder()
-	requestUrl := path.Join("/downloadFile", folder, fileName)
+	requestUrl := path.Join("/DownloadFile", folder, fileName)
 	req, _ := http.NewRequest("GET", requestUrl, nil)
 
 	// Serve the request using the test router

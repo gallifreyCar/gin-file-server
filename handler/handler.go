@@ -10,7 +10,7 @@ import (
 	"path"
 )
 
-func uploadFileSingle(c *gin.Context) {
+func UploadFileSingle(c *gin.Context) {
 
 	// Get the field name for file uploads from the request
 	fieldName := c.DefaultPostForm("fieldName", "file")
@@ -28,7 +28,7 @@ func uploadFileSingle(c *gin.Context) {
 	c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
 }
 
-func uploadFiles(c *gin.Context) {
+func UploadFiles(c *gin.Context) {
 
 	// Get the field name for file uploads from the request
 	fieldName := c.DefaultPostForm("fieldName", "files")
@@ -53,7 +53,7 @@ func uploadFiles(c *gin.Context) {
 	c.String(http.StatusOK, fmt.Sprintf("%d files uploaded!", len(files)))
 }
 
-func downloadFile(c *gin.Context) {
+func DownloadFile(c *gin.Context) {
 	// Get url param
 	folder := c.Param("folder")
 	fileName := c.Param("file_name")
