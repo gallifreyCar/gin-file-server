@@ -8,32 +8,37 @@ import (
 )
 
 func uploadFileSingle(c *gin.Context) {
-	// 单文件
-	file, _ := c.FormFile("file")
+
+	// Get the field name for file uploads from the request
+	fieldName := c.DefaultPostForm("fieldName", "file")
+	// Single file
+	file, _ := c.FormFile(fieldName)
 	log.Println(file.Filename)
 
 	dst := "../target/" + file.Filename
-	// 上传文件至指定的完整文件路径
+	// Save the uploaded file to the specified directory
 	c.SaveUploadedFile(file, dst)
 
 	c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
 }
 
 func uploadFiles(c *gin.Context) {
-	// Multipart form
-	form, err := c.MultipartForm()
 
+	// Get the field name for file uploads from the request
+	fieldName := c.DefaultPostForm("fieldName", "files")
+	// Parse the multipart form
+	form, err := c.MultipartForm()
 	if err != nil {
 		c.String(http.StatusBadRequest, "get form err: %s", err.Error())
 		return
 	}
-
-	files := form.File["upload[]"]
+	// Get the uploaded files based on the specified field name
+	files := form.File[fieldName]
 	for _, file := range files {
 		log.Println(file.Filename)
 
 		dst := "../target/" + file.Filename
-		// 上传文件至指定目录
+		// Save the uploaded file to the specified directory
 		c.SaveUploadedFile(file, dst)
 	}
 	c.String(http.StatusOK, fmt.Sprintf("%d files uploaded!", len(files)))
