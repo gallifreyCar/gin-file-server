@@ -14,15 +14,23 @@ func UploadFileSingle(c *gin.Context) {
 
 	// Get the field name for file uploads from the request
 	fieldName := c.DefaultPostForm("fieldName", "file")
+
 	// Single file
-	file, _ := c.FormFile(fieldName)
+	file, err := c.FormFile(fieldName)
+	if err != nil {
+		c.String(http.StatusBadRequest, fmt.Sprintf("get form err: %s", err.Error()))
+
+		return
+	}
 	log.Println(file.Filename)
 
 	dst := "../target/upload/single/" + file.Filename
 	// Save the uploaded file to the specified directory
-	err := c.SaveUploadedFile(file, dst)
+	err = c.SaveUploadedFile(file, dst)
 	if err != nil {
-		log.Fatal(err)
+		c.String(http.StatusBadRequest, fmt.Sprintf("get form err: %s", err.Error()))
+
+		return
 	}
 
 	c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
@@ -35,19 +43,21 @@ func UploadFiles(c *gin.Context) {
 	// Parse the multipart form
 	form, err := c.MultipartForm()
 	if err != nil {
-		c.String(http.StatusBadRequest, "get form err: %s", err.Error())
+		c.String(http.StatusBadRequest, fmt.Sprintf("get form err: %s", err.Error()))
+
 		return
 	}
 	// Get the uploaded files based on the specified field name
 	files := form.File[fieldName]
 	for _, file := range files {
 		log.Println(file.Filename)
-
 		dst := "../target/upload/multiple/" + file.Filename
 		// Save the uploaded file to the specified directory
 		err := c.SaveUploadedFile(file, dst)
 		if err != nil {
-			log.Fatal(err)
+			c.String(http.StatusBadRequest, fmt.Sprintf("get form err: %s", err.Error()))
+
+			return
 		}
 	}
 	c.String(http.StatusOK, fmt.Sprintf("%d files uploaded!", len(files)))
