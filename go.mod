@@ -1,11 +1,8 @@
-module github.com/gallifreyCar/gin-file-server/handler
+module github.com/gallifreyCar/gin-file-server
 
 go 1.20
 
-require (
-	github.com/gin-gonic/gin v1.9.0
-	github.com/go-playground/assert/v2 v2.2.0
-)
+require github.com/gin-gonic/gin v1.9.0
 
 require (
 	github.com/bytedance/sonic v1.8.0 // indirect
