@@ -93,8 +93,12 @@ func TestUploadFiles(t *testing.T) {
 	var files []*os.File
 	for i := 0; i < 3; i++ {
 		tempFiles, err := os.CreateTemp("", "example*.txt")
+		if err != nil {
+			t.Fatal(err)
+		}
+
 		// Write some data to the file
-		tempFiles.WriteString(fmt.Sprintf("testing file upload %v", i))
+		_, err = tempFiles.WriteString(fmt.Sprintf("testing file upload %v", i))
 
 		if err != nil {
 			t.Fatal(err)
@@ -105,7 +109,10 @@ func TestUploadFiles(t *testing.T) {
 	//Remove files from os
 	defer func() {
 		for _, file := range files {
-			os.Remove(file.Name())
+			err := os.Remove(file.Name())
+			if err != nil {
+				t.Fatal(err)
+			}
 		}
 	}()
 
