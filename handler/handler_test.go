@@ -15,6 +15,8 @@ import (
 	"testing"
 )
 
+//todo Extract code to generate files.
+
 func setupRouter() *gin.Engine {
 	r := gin.Default()
 	r.POST("/uploadFile", UploadFileSingle)
@@ -163,6 +165,7 @@ func TestUploadFiles(t *testing.T) {
 
 }
 
+// todo use testCase struct to rewrite this unit test
 func TestDownloadFile(t *testing.T) {
 	folder := "single"
 	fileName := "example617170769.txt"
