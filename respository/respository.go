@@ -1,6 +1,7 @@
 package respository
 
 import (
+	log2 "github.com/gallifreyCar/gin-file-server/log"
 	"github.com/gallifreyCar/gin-file-server/model"
 	mysqlDriver "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
@@ -12,12 +13,14 @@ import (
 func getDataBase() (db *gorm.DB, err error) {
 
 	//set dataBase.log
-	file, err := os.OpenFile("../log/dataBase.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		log.Println(err)
-	}
-	log.SetPrefix("[ConnectToDB] ")
-	log.SetOutput(file)
+	file := log2.InitLogFile("dataBase.log", "[DataBase]")
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+
+			log.Fatal(err)
+		}
+	}(file)
 
 	// Capture connection properties.
 	cfg := mysqlDriver.Config{
@@ -52,26 +55,14 @@ func getDataBase() (db *gorm.DB, err error) {
 	}
 	return db, err
 }
-func insertFileLog(savePath, fileName, userAgent, fileType string) (ID uint, RowsAffected int64, err error) {
+func insertFileLog(savePath, fileName, userAgent, fileType string, db *gorm.DB) (ID uint, RowsAffected int64, err error) {
 
-	//connect to database
-	db, err := getDataBase()
-	if err != nil {
-		log.Fatal(err)
-	}
 	//set dataBase.log
-	file, err := os.OpenFile("../log/dataBase.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatal(err)
-
-	}
-
-	log.SetPrefix("[InsertFile] ")
-	log.SetOutput(file)
+	file := log2.InitLogFile("dataBase.log", "[InsertFile]")
 	defer func(file *os.File) {
-
 		err := file.Close()
 		if err != nil {
+
 			log.Fatal(err)
 		}
 	}(file)
@@ -91,24 +82,11 @@ func insertFileLog(savePath, fileName, userAgent, fileType string) (ID uint, Row
 	return fileLog.ID, result.RowsAffected, result.Error
 
 }
-func selectFileLog(fileName string) (model.UploadFileLog, error) {
-	//connect to database
-	db, err := getDataBase()
-	if err != nil {
-		log.Fatal(err)
-	}
+func selectFileLog(fileName string, db *gorm.DB) (model.UploadFileLog, error) {
 
 	//set dataBase.log
-	file, err := os.OpenFile("../log/dataBase.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		log.Fatal(err)
-
-	}
-
-	log.SetPrefix("[selectFile] ")
-	log.SetOutput(file)
+	file := log2.InitLogFile("dataBase.log", "[selectFile]")
 	defer func(file *os.File) {
-
 		err := file.Close()
 		if err != nil {
 

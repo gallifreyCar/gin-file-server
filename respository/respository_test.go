@@ -20,8 +20,11 @@ func TestGetDataBase(t *testing.T) {
 }
 
 func TestInsertFileLog(t *testing.T) {
-
-	id, rowsAffected, err := insertFileLog("testSavePath", "testFileName", "tstUserAgent", "testFileType")
+	db, err := getDataBase()
+	if err != nil {
+		t.Error(err)
+	}
+	id, rowsAffected, err := insertFileLog("testSavePath", "testFileName", "tstUserAgent", "testFileType", db)
 	t.Logf("ID: %v,RowsAffected: %v", id, rowsAffected)
 	if err != nil {
 		t.Error(err)
@@ -30,8 +33,11 @@ func TestInsertFileLog(t *testing.T) {
 }
 
 func TestSelectFileLog(t *testing.T) {
-
-	fileLog, err := selectFileLog("testFileName")
+	db, err := getDataBase()
+	if err != nil {
+		t.Error(err)
+	}
+	fileLog, err := selectFileLog("testFileName", db)
 	t.Logf("fileLog: %v", fileLog)
 	if err != nil {
 		t.Error(err)
