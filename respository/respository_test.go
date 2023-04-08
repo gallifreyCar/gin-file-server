@@ -9,7 +9,7 @@ import (
 )
 
 func TestGetDataBase(t *testing.T) {
-	db, err := getDataBase()
+	db, err := GetDataBase()
 	if err != nil {
 		t.Error(err)
 	}
@@ -26,11 +26,11 @@ func TestGetDataBase(t *testing.T) {
 }
 
 func TestInsertFileLog(t *testing.T) {
-	db, err := getDataBase()
+	db, err := GetDataBase()
 	if err != nil {
 		t.Error(err)
 	}
-	id, rowsAffected, err := insertFileLog("testSavePath", "testFileName", "tstUserAgent", "testFileType", db)
+	id, rowsAffected, err := InsertFileLog("testSavePath", "testFileName", "tstUserAgent", "testFileType", db)
 	t.Logf("ID: %v,RowsAffected: %v", id, rowsAffected)
 	if err != nil {
 		t.Error(err)
@@ -45,7 +45,7 @@ func TestSelectFileLog(t *testing.T) {
 	createAt, _ := time.ParseInLocation(layout, "2023-04-07 16:43:28 +0800 CST", loc)
 	updatedAt, _ := time.ParseInLocation(layout, "2023-04-07 16:43:28 +0800 CST", loc)
 
-	db, _ := getDataBase()
+	db, _ := GetDataBase()
 
 	type args struct {
 		fileName string
@@ -89,13 +89,13 @@ func TestSelectFileLog(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := selectFileLog(tt.args.fileName, tt.args.db)
+			got, err := SelectFileLog(tt.args.fileName, tt.args.db)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("selectFileLog() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("SelectFileLog() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("selectFileLog() got = %v, want %v", got, tt.want)
+				t.Errorf("SelectFileLog() got = %v, want %v", got, tt.want)
 			}
 		})
 	}
