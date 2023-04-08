@@ -1,4 +1,4 @@
-package respository
+package repository
 
 import (
 	log2 "github.com/gallifreyCar/gin-file-server/log"

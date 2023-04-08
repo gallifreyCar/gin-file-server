@@ -1,4 +1,4 @@
-package respository
+package repository
 
 import (
 	"github.com/gallifreyCar/gin-file-server/model"
