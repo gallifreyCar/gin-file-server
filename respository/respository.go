@@ -95,9 +95,13 @@ func selectFileLog(fileName string, db *gorm.DB) (model.UploadFileLog, error) {
 	}(file)
 
 	var fileLog model.UploadFileLog
-	result := db.Where(&model.UploadFileLog{FileName: fileName}).Last(&fileLog)
+	result := db.Where(&model.UploadFileLog{FileName: fileName}).First(&fileLog)
+
+	if result.Error != nil {
+		log.Println(result.Error)
+		return fileLog, result.Error
+	}
 
 	log.Printf("ID: %v,RowsAffected: %v", fileLog.ID, result.RowsAffected)
-
 	return fileLog, result.Error
 }
