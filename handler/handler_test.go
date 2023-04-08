@@ -78,6 +78,7 @@ func TestUploadFileSingle(t *testing.T) {
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/uploadFile", body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
 	//Serve the request using the test router
 	router.ServeHTTP(w, req)
 
@@ -154,6 +155,7 @@ func TestUploadFiles(t *testing.T) {
 	req, _ := http.NewRequest("POST", "/uploadFiles", body)
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	req.PostForm = url.Values{"fieldName": {fieldName}}
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
 	// Serve the request using the test router
 	router.ServeHTTP(w, req)
 

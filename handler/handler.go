@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	log2 "github.com/gallifreyCar/gin-file-server/log"
+	"github.com/gallifreyCar/gin-file-server/repository"
 	"github.com/gin-gonic/gin"
 	"log"
 	"mime"
@@ -42,6 +43,14 @@ func UploadFileSingle(c *gin.Context) {
 		c.String(http.StatusBadRequest, fmt.Sprintf("get form err: %s", err.Error()))
 		return
 	}
+
+	db, _ := repository.GetDataBase()
+	userAgent := c.GetHeader("User-Agent")
+	fileType := path.Ext(file.Filename)
+	_, _, err = repository.InsertFileLog("../target/upload/single/", file.Filename, userAgent, fileType, db)
+	if err != nil {
+		log.Println(err)
+	}
 	log.Println(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
 	c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
 }
@@ -69,6 +78,7 @@ func UploadFiles(c *gin.Context) {
 	}
 	// Get the uploaded files based on the specified field name
 	files := form.File[fieldName]
+	db, _ := repository.GetDataBase()
 	for _, file := range files {
 		log.Println(file.Filename)
 		dst := "../target/upload/multiple/" + file.Filename
@@ -80,6 +90,14 @@ func UploadFiles(c *gin.Context) {
 
 			return
 		}
+
+		userAgent := c.GetHeader("User-Agent")
+		fileType := path.Ext(file.Filename)
+		_, _, err = repository.InsertFileLog("../target/upload/multiple/", file.Filename, userAgent, fileType, db)
+		if err != nil {
+			log.Println(err)
+		}
+
 	}
 	log.Println(http.StatusOK, fmt.Sprintf("%d files uploaded!", len(files)))
 	c.String(http.StatusOK, fmt.Sprintf("%d files uploaded!", len(files)))
