@@ -10,6 +10,15 @@ import (
 )
 
 func getDataBase() (db *gorm.DB, err error) {
+
+	//set dataBase.log
+	file, err := os.OpenFile("../log/dataBase.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Println(err)
+	}
+	log.SetPrefix("[ConnectToDB] ")
+	log.SetOutput(file)
+
 	// Capture connection properties.
 	cfg := mysqlDriver.Config{
 		User:   os.Getenv("DBUser"),
@@ -22,11 +31,34 @@ func getDataBase() (db *gorm.DB, err error) {
 			"parseTime": "True",
 		},
 	}
-	db, err = gorm.Open(mysql.Open(cfg.FormatDSN()), &gorm.Config{})
+	//log cfg
+	logCfg := mysqlDriver.Config{
+		User:   "DBUser",
+		Passwd: "DBPassword",
+		DBName: os.Getenv("DBName"),
+		Addr:   "localhost:3306",
+		Net:    "tcp",
+		Params: map[string]string{
+			"loc":       "Local",
+			"parseTime": "True",
+		},
+	}
 
+	db, err = gorm.Open(mysql.Open(cfg.FormatDSN()), &gorm.Config{})
+	if err != nil {
+		log.Println(err)
+	} else {
+		log.Println(logCfg.FormatDSN())
+	}
 	return db, err
 }
-func insertFileLog(savePath, fileName, userAgent, fileType string, db *gorm.DB) (ID uint, RowsAffected int64, err error) {
+func insertFileLog(savePath, fileName, userAgent, fileType string) (ID uint, RowsAffected int64, err error) {
+
+	//connect to database
+	db, err := getDataBase()
+	if err != nil {
+		log.Fatal(err)
+	}
 	//set dataBase.log
 	file, err := os.OpenFile("../log/dataBase.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
@@ -59,7 +91,13 @@ func insertFileLog(savePath, fileName, userAgent, fileType string, db *gorm.DB) 
 	return fileLog.ID, result.RowsAffected, result.Error
 
 }
-func selectFileLog(fileName string, db *gorm.DB) (model.UploadFileLog, error) {
+func selectFileLog(fileName string) (model.UploadFileLog, error) {
+	//connect to database
+	db, err := getDataBase()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	//set dataBase.log
 	file, err := os.OpenFile("../log/dataBase.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
@@ -79,11 +117,9 @@ func selectFileLog(fileName string, db *gorm.DB) (model.UploadFileLog, error) {
 	}(file)
 
 	var fileLog model.UploadFileLog
-	//result := db.Where(&model.UploadFileLog{FileName: fileName}).First(fileLog)
-	result := db.Where(&model.UploadFileLog{FileName: fileName}).First(&fileLog)
+	result := db.Where(&model.UploadFileLog{FileName: fileName}).Last(&fileLog)
 
-	log.Print(result.Error)
-	log.Print(result.RowsAffected)
+	log.Printf("ID: %v,RowsAffected: %v", fileLog.ID, result.RowsAffected)
 
 	return fileLog, result.Error
 }
