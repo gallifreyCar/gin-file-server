@@ -20,7 +20,7 @@ import (
 func setupRouter() *gin.Engine {
 	r := gin.Default()
 	r.POST("/uploadFile", UploadFileSingle)
-	r.POST("/UploadFiles", UploadFiles)
+	r.POST("/uploadFiles", UploadFiles)
 	r.GET("/DownloadFile/:folder/:file_name", DownloadFile)
 	return r
 }
