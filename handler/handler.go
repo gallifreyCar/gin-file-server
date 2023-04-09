@@ -5,7 +5,6 @@ import (
 	log2 "github.com/gallifreyCar/gin-file-server/log"
 	"github.com/gallifreyCar/gin-file-server/repository"
 	"github.com/gin-gonic/gin"
-	"log"
 	"mime"
 	"net/http"
 	"os"
@@ -14,13 +13,13 @@ import (
 
 func UploadFileSingle(c *gin.Context) {
 
-	//set handle log
-	logFile := log2.InitLogFile("gin-file-server.log", "[UploadFileSingle]")
+	//set handle logger
+	logFile, logger := log2.InitLogFile("gin-file-server.log", "[UploadFileSingle]")
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
 
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 	}(logFile)
 
@@ -30,7 +29,7 @@ func UploadFileSingle(c *gin.Context) {
 	// Single file
 	file, err := c.FormFile(fieldName)
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		c.String(http.StatusBadRequest, fmt.Sprintf("get form err: %s", err.Error()))
 		return
 	}
@@ -39,31 +38,31 @@ func UploadFileSingle(c *gin.Context) {
 	// Save the uploaded file to the specified directory
 	err = c.SaveUploadedFile(file, dst)
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		c.String(http.StatusBadRequest, fmt.Sprintf("get form err: %s", err.Error()))
 		return
 	}
 
-	//insert an upload file log record to database
+	//insert an upload file logger record to database
 	db, _ := repository.GetDataBase()
 	userAgent := c.GetHeader("User-Agent")
 	fileType := path.Ext(file.Filename)
 	_, _, err = repository.InsertFileLog("../target/upload/single/", file.Filename, userAgent, fileType, file.Size, db)
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 	}
-	log.Println(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
+	logger.Println(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
 	c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
 }
 
 func UploadFiles(c *gin.Context) {
 
-	//set handle log
-	logFile := log2.InitLogFile("gin-file-server.log", "[UploadFileMultiple]")
+	//set handle logger
+	logFile, logger := log2.InitLogFile("gin-file-server.log", "[UploadFileMultiple]")
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 	}(logFile)
 
@@ -72,7 +71,7 @@ func UploadFiles(c *gin.Context) {
 	// Parse the multipart form
 	form, err := c.MultipartForm()
 	if err != nil {
-		log.Println(err)
+		logger.Println(err)
 		c.String(http.StatusBadRequest, fmt.Sprintf("get form err: %s", err.Error()))
 
 		return
@@ -81,12 +80,12 @@ func UploadFiles(c *gin.Context) {
 	files := form.File[fieldName]
 	db, _ := repository.GetDataBase()
 	for _, file := range files {
-		log.Println(file.Filename)
+		logger.Println(file.Filename)
 		dst := "../target/upload/multiple/" + file.Filename
 		// Save the uploaded file to the specified directory
 		err := c.SaveUploadedFile(file, dst)
 		if err != nil {
-			log.Println(err)
+			logger.Println(err)
 			c.String(http.StatusBadRequest, fmt.Sprintf("get form err: %s", err.Error()))
 
 			return
@@ -96,21 +95,21 @@ func UploadFiles(c *gin.Context) {
 		fileType := path.Ext(file.Filename)
 		_, _, err = repository.InsertFileLog("../target/upload/multiple/", file.Filename, userAgent, fileType, file.Size, db)
 		if err != nil {
-			log.Println(err)
+			logger.Println(err)
 		}
 
 	}
-	log.Println(http.StatusOK, fmt.Sprintf("%d files uploaded!", len(files)))
+	logger.Println(http.StatusOK, fmt.Sprintf("%d files uploaded!", len(files)))
 	c.String(http.StatusOK, fmt.Sprintf("%d files uploaded!", len(files)))
 }
 
 func DownloadFile(c *gin.Context) {
-	//set handle log
-	logFile := log2.InitLogFile("gin-file-server.log", "[DownloadFile]")
+	//set handle logger
+	logFile, logger := log2.InitLogFile("gin-file-server.log", "[DownloadFile]")
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 	}(logFile)
 
@@ -122,7 +121,7 @@ func DownloadFile(c *gin.Context) {
 	filePath := path.Join(baseUrl, folder, fileName)
 	// Check the files is existence or not
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		log.Println(err)
+		logger.Println(err)
 		// if file is not existence , return 404
 		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"message": "file not found"})
 		return
@@ -134,35 +133,35 @@ func DownloadFile(c *gin.Context) {
 	c.Header("Content-Disposition", "attachment; filename="+fileName)
 	c.Status(http.StatusOK)
 	c.File(filePath)
-	log.Printf("Folder: %v,Folder:%v,Code:%v\n", folder, folder, http.StatusOK)
+	logger.Printf("Folder: %v,Folder:%v,Code:%v\n", folder, folder, http.StatusOK)
 
 }
 
 func SelectFileLogByName(c *gin.Context) {
-	//set handle log
-	logFile := log2.InitLogFile("gin-file-server.log", "[SelectFileLogByName]")
+	//set handle logger
+	logFile, logger := log2.InitLogFile("gin-file-server.log", "[SelectFileLogByName]")
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
 			c.String(http.StatusInternalServerError, fmt.Sprintf("get form err: %s", err.Error()))
-			log.Println(err)
+			logger.Println(err)
 		}
 	}(logFile)
 	// Get url param
 	fileName := c.Param("file_name")
-	// Get log
+	// Get logger
 	db, err := repository.GetDataBase()
 	if err != nil {
 		c.String(http.StatusInternalServerError, fmt.Sprintf("get form err: %s", err.Error()))
-		log.Println(err)
+		logger.Println(err)
 
 	}
 	uploadFileLog, err := repository.SelectFileLog(fileName, db)
 	if err != nil {
 		c.String(http.StatusNotFound, fmt.Sprintf("get form err: %s", err.Error()))
-		log.Println(err)
+		logger.Println(err)
 	}
-	log.Println(uploadFileLog)
+	logger.Println(uploadFileLog)
 
 	c.IndentedJSON(http.StatusOK, uploadFileLog)
 }

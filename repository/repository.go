@@ -6,14 +6,13 @@ import (
 	mysqlDriver "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"log"
 	"os"
 )
 
 func GetDataBase() (db *gorm.DB, err error) {
 
 	//set dataBase.log
-	file := log2.InitLogFile("gin-file-server.log", "[DataBase]")
+	file, log := log2.InitLogFile("gin-file-server.log", "[DataBase]")
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
@@ -57,13 +56,13 @@ func GetDataBase() (db *gorm.DB, err error) {
 }
 func InsertFileLog(savePath, fileName, userAgent, fileType string, fileSize int64, db *gorm.DB) (ID uint, RowsAffected int64, err error) {
 
-	//set dataBase.log
-	file := log2.InitLogFile("gin-file-server.log", "[InsertFile]")
+	//set dataBase.logger
+	file, logger := log2.InitLogFile("gin-file-server.log", "[InsertFile]")
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
 
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 	}(file)
 
@@ -77,7 +76,7 @@ func InsertFileLog(savePath, fileName, userAgent, fileType string, fileSize int6
 	}
 	result := db.Create(&fileLog)
 	if result.Error == nil {
-		log.Printf("ID:%v,RowsAffected:%v", fileLog.ID, result.RowsAffected)
+		logger.Printf("ID:%v,RowsAffected:%v", fileLog.ID, result.RowsAffected)
 	}
 
 	return fileLog.ID, result.RowsAffected, result.Error
@@ -85,13 +84,13 @@ func InsertFileLog(savePath, fileName, userAgent, fileType string, fileSize int6
 }
 func SelectFileLog(fileName string, db *gorm.DB) (model.UploadFileLog, error) {
 
-	//set dataBase.log
-	file := log2.InitLogFile("gin-file-server.log", "[selectFile]")
+	//set dataBase.logger
+	file, logger := log2.InitLogFile("gin-file-server.log", "[selectFile]")
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
 
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 	}(file)
 
@@ -99,10 +98,10 @@ func SelectFileLog(fileName string, db *gorm.DB) (model.UploadFileLog, error) {
 	result := db.Where(&model.UploadFileLog{FileName: fileName}).First(&fileLog)
 
 	if result.Error != nil {
-		log.Println(result.Error)
+		logger.Println(result.Error)
 		return fileLog, result.Error
 	}
 
-	log.Printf("ID: %v,RowsAffected: %v", fileLog.ID, result.RowsAffected)
+	logger.Printf("ID: %v,RowsAffected: %v", fileLog.ID, result.RowsAffected)
 	return fileLog, result.Error
 }
