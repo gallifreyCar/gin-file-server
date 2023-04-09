@@ -29,9 +29,8 @@ func setupRouter() *gin.Engine {
 	// Set a lower memory limit for multipart forms (default is 32 MiB)
 	r.MaxMultipartMemory = 8 << 20 // 8 MiB
 	//set a size limit on the uploaded files
-	r.Use(MaxAllowed(9 << 20))
-	r.POST("/uploadFile", handler.UploadFileSingle)
-	r.POST("/uploadFiles", handler.UploadFiles)
+	r.POST("/uploadFile", MaxAllowed(10<<20), handler.UploadFileSingle)
+	r.POST("/uploadFiles", MaxAllowed(50<<20), handler.UploadFiles)
 	r.GET("/downloadFile/:folder/:file_name", handler.DownloadFile)
 
 	return r
