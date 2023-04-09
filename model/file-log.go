@@ -23,6 +23,6 @@ type UploadFileLog struct {
 	FileName  string `gorm:"->;<-:create"` //allow read and write(create)
 	UserAgent string `gorm:"->;<-:create"` //allow read and write(create)
 	FileType  string `gorm:"->;<-:create"` //allow read and write(create)
-	FileSize  string `gorm:"->;<-:create"` //allow read and write(create)
+	FileSize  int64  `gorm:"->;<-:create"` //allow read and write(create)
 	SavePath  string `gorm:"->;<-:create"` //allow read and write(create)
 }
