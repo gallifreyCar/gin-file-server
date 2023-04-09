@@ -32,6 +32,6 @@ func setupRouter() *gin.Engine {
 	r.POST("/uploadFile", MaxAllowed(10<<20), handler.UploadFileSingle)
 	r.POST("/uploadFiles", MaxAllowed(50<<20), handler.UploadFiles)
 	r.GET("/downloadFile/:folder/:file_name", handler.DownloadFile)
-
+	r.GET("/uploads/file_name/:file_name", handler.SelectFileLogByName)
 	return r
 }

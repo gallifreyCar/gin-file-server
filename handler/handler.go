@@ -137,3 +137,32 @@ func DownloadFile(c *gin.Context) {
 	log.Printf("Folder: %v,Folder:%v,Code:%v\n", folder, folder, http.StatusOK)
 
 }
+
+func SelectFileLogByName(c *gin.Context) {
+	//set handle log
+	logFile := log2.InitLogFile("gin-file-server.log", "[SelectFileLogByName]")
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			c.String(http.StatusInternalServerError, fmt.Sprintf("get form err: %s", err.Error()))
+			log.Println(err)
+		}
+	}(logFile)
+	// Get url param
+	fileName := c.Param("file_name")
+	// Get log
+	db, err := repository.GetDataBase()
+	if err != nil {
+		c.String(http.StatusInternalServerError, fmt.Sprintf("get form err: %s", err.Error()))
+		log.Println(err)
+
+	}
+	uploadFileLog, err := repository.SelectFileLog(fileName, db)
+	if err != nil {
+		c.String(http.StatusNotFound, fmt.Sprintf("get form err: %s", err.Error()))
+		log.Println(err)
+	}
+	log.Println(uploadFileLog)
+
+	c.IndentedJSON(http.StatusOK, uploadFileLog)
+}

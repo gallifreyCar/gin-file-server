@@ -27,6 +27,7 @@ func TestSetupRouter(t *testing.T) {
 		{"TestUploadFileSingle", "/uploadFile", http.MethodPost, "multipart/form-data", http.StatusBadRequest},
 		{"TestUploadFiles", "/uploadFiles", http.MethodPost, "multipart/form-data", http.StatusBadRequest},
 		{"TestDownloadFile", "/downloadFile/single/myfile.txt", "", http.MethodGet, http.StatusNotFound},
+		{"TestSelectFileLogByName", "/uploads/file_name/example3450268643.txt", "", http.MethodGet, http.StatusOK},
 	}
 
 	for _, tc := range testCases {
