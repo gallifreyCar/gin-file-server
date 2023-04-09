@@ -30,7 +30,7 @@ func TestInsertFileLog(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	id, rowsAffected, err := InsertFileLog("testSavePath", "testFileName", "tstUserAgent", "testFileType", db)
+	id, rowsAffected, err := InsertFileLog("testSavePath", "testFileName", "tstUserAgent", "testFileType", 14, db)
 	t.Logf("ID: %v,RowsAffected: %v", id, rowsAffected)
 	if err != nil {
 		t.Error(err)

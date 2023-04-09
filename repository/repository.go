@@ -55,7 +55,7 @@ func GetDataBase() (db *gorm.DB, err error) {
 	}
 	return db, err
 }
-func InsertFileLog(savePath, fileName, userAgent, fileType string, db *gorm.DB) (ID uint, RowsAffected int64, err error) {
+func InsertFileLog(savePath, fileName, userAgent, fileType string, fileSize int64, db *gorm.DB) (ID uint, RowsAffected int64, err error) {
 
 	//set dataBase.log
 	file := log2.InitLogFile("dataBase.log", "[InsertFile]")
@@ -73,6 +73,7 @@ func InsertFileLog(savePath, fileName, userAgent, fileType string, db *gorm.DB) 
 		UserAgent: userAgent,
 		FileType:  fileType,
 		SavePath:  savePath,
+		FileSize:  fileSize,
 	}
 	result := db.Create(&fileLog)
 	if result.Error == nil {

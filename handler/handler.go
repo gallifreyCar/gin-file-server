@@ -44,10 +44,11 @@ func UploadFileSingle(c *gin.Context) {
 		return
 	}
 
+	//insert an upload file log record to database
 	db, _ := repository.GetDataBase()
 	userAgent := c.GetHeader("User-Agent")
 	fileType := path.Ext(file.Filename)
-	_, _, err = repository.InsertFileLog("../target/upload/single/", file.Filename, userAgent, fileType, db)
+	_, _, err = repository.InsertFileLog("../target/upload/single/", file.Filename, userAgent, fileType, file.Size, db)
 	if err != nil {
 		log.Println(err)
 	}
@@ -93,7 +94,7 @@ func UploadFiles(c *gin.Context) {
 
 		userAgent := c.GetHeader("User-Agent")
 		fileType := path.Ext(file.Filename)
-		_, _, err = repository.InsertFileLog("../target/upload/multiple/", file.Filename, userAgent, fileType, db)
+		_, _, err = repository.InsertFileLog("../target/upload/multiple/", file.Filename, userAgent, fileType, file.Size, db)
 		if err != nil {
 			log.Println(err)
 		}
