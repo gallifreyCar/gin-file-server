@@ -15,7 +15,7 @@ import (
 func UploadFileSingle(c *gin.Context) {
 
 	//set handle log
-	logFile := log2.InitLogFile("handle.log", "[UploadFileSingle]")
+	logFile := log2.InitLogFile("gin-file-server.log", "[UploadFileSingle]")
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
@@ -59,7 +59,7 @@ func UploadFileSingle(c *gin.Context) {
 func UploadFiles(c *gin.Context) {
 
 	//set handle log
-	logFile := log2.InitLogFile("handle.log", "[UploadFileMultiple]")
+	logFile := log2.InitLogFile("gin-file-server.log", "[UploadFileMultiple]")
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
@@ -106,7 +106,7 @@ func UploadFiles(c *gin.Context) {
 
 func DownloadFile(c *gin.Context) {
 	//set handle log
-	logFile := log2.InitLogFile("handle.log", "[DownloadFile]")
+	logFile := log2.InitLogFile("gin-file-server.log", "[DownloadFile]")
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {

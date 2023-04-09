@@ -13,7 +13,7 @@ import (
 func GetDataBase() (db *gorm.DB, err error) {
 
 	//set dataBase.log
-	file := log2.InitLogFile("dataBase.log", "[DataBase]")
+	file := log2.InitLogFile("gin-file-server.log", "[DataBase]")
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
@@ -58,7 +58,7 @@ func GetDataBase() (db *gorm.DB, err error) {
 func InsertFileLog(savePath, fileName, userAgent, fileType string, fileSize int64, db *gorm.DB) (ID uint, RowsAffected int64, err error) {
 
 	//set dataBase.log
-	file := log2.InitLogFile("dataBase.log", "[InsertFile]")
+	file := log2.InitLogFile("gin-file-server.log", "[InsertFile]")
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
@@ -86,7 +86,7 @@ func InsertFileLog(savePath, fileName, userAgent, fileType string, fileSize int6
 func SelectFileLog(fileName string, db *gorm.DB) (model.UploadFileLog, error) {
 
 	//set dataBase.log
-	file := log2.InitLogFile("dataBase.log", "[selectFile]")
+	file := log2.InitLogFile("gin-file-server.log", "[selectFile]")
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
