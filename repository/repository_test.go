@@ -42,8 +42,8 @@ func TestSelectFileLog(t *testing.T) {
 
 	layout := "2006-01-02 15:04:05 -0700 MST"
 	loc, _ := time.LoadLocation("Local")
-	createAt, _ := time.ParseInLocation(layout, "2023-04-07 16:43:28 +0800 CST", loc)
-	updatedAt, _ := time.ParseInLocation(layout, "2023-04-07 16:43:28 +0800 CST", loc)
+	createAt, _ := time.ParseInLocation(layout, "2023-04-09 14:26:28 +0800 CST", loc)
+	updatedAt, _ := time.ParseInLocation(layout, "2023-04-09 14:26:28 +0800 CST", loc)
 
 	db, _ := GetDataBase()
 
@@ -60,20 +60,21 @@ func TestSelectFileLog(t *testing.T) {
 		{
 			name: "Valid file name",
 			args: args{
-				fileName: "testFileName",
+				fileName: "example3795788070.txt",
 				db:       db,
 			},
 			want: model.UploadFileLog{
 				Model: gorm.Model{
-					ID:        1,
+					ID:        43,
 					CreatedAt: createAt,
 					UpdatedAt: updatedAt,
 					DeletedAt: gorm.DeletedAt{},
 				},
-				SavePath:  "testSavePath",
-				FileName:  "testFileName",
-				UserAgent: "tstUserAgent",
-				FileType:  "testFileType",
+				SavePath:  "../target/upload/multiple/",
+				FileName:  "example3795788070.txt",
+				UserAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+				FileType:  ".txt",
+				FileSize:  21,
 			},
 			wantErr: false,
 		},

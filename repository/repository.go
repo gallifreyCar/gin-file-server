@@ -95,7 +95,7 @@ func SelectFileLog(fileName string, db *gorm.DB) (model.UploadFileLog, error) {
 	}(file)
 
 	var fileLog model.UploadFileLog
-	result := db.Where(&model.UploadFileLog{FileName: fileName}).First(&fileLog)
+	result := db.Where(&model.UploadFileLog{FileName: fileName}).Last(&fileLog)
 
 	if result.Error != nil {
 		logger.Println(result.Error)
