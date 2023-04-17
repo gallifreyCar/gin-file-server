@@ -11,7 +11,7 @@ import (
 )
 
 // Produce use kafka-go Connection api, learn more:https://pkg.go.dev/github.com/segmentio/kafka-go#readme-connection
-func Produce(topic string, message []string) (err error) {
+func Produce(topic string, message []string, partition int) (err error) {
 
 	//set a logger
 	logFile, log := log2.InitLogFile("gin-file-server.log", "[Produce]")
@@ -23,7 +23,6 @@ func Produce(topic string, message []string) (err error) {
 	}(logFile)
 
 	// to produce messages
-	partition := 0
 	address := os.Getenv("address")
 
 	conn, err := kafka.DialLeader(context.Background(), "tcp", address, topic, partition)

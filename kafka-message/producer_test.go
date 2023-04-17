@@ -8,8 +8,9 @@ import (
 
 func TestProduce(t *testing.T) {
 	type args struct {
-		topic   string
-		message []string
+		partition int
+		topic     string
+		message   []string
 	}
 	tests := []struct {
 		name    string
@@ -19,47 +20,52 @@ func TestProduce(t *testing.T) {
 		{
 			name: "test with empty topic and empty message",
 			args: args{
-				topic:   "",
-				message: []string{},
+				topic:     "",
+				partition: 0,
+				message:   []string{},
 			},
 			wantErr: true,
 		},
 		{
 			name: "test with empty topic",
 			args: args{
-				topic:   "",
-				message: []string{"hello world"},
+				partition: 0,
+				topic:     "",
+				message:   []string{"hello world"},
 			},
 			wantErr: true,
 		},
 		{
 			name: "test with empty message",
 			args: args{
-				topic:   "test-topic",
-				message: []string{},
+				partition: 0,
+				topic:     "test-topic",
+				message:   []string{},
 			},
 			wantErr: false,
 		},
 		{
 			name: "test with single message",
 			args: args{
-				topic:   "test-topic",
-				message: []string{"hello world"},
+				partition: 0,
+				topic:     "test-topic",
+				message:   []string{"hello world"},
 			},
 			wantErr: false,
 		},
 		{
 			name: "test with multiple messages",
 			args: args{
-				topic:   "test-topic",
-				message: []string{"hello", "world", "this", "is", "a", "test"},
+				partition: 0,
+				topic:     "test-topic",
+				message:   []string{"hello", "world", "this", "is", "a", "test"},
 			},
 			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := Produce(tt.args.topic, tt.args.message); (err != nil) != tt.wantErr {
+			if err := Produce(tt.args.topic, tt.args.message, tt.args.partition); (err != nil) != tt.wantErr {
 				t.Errorf("Produce() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
