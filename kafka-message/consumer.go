@@ -74,7 +74,7 @@ func ConsumeReader(brokers []string, topic string, partition int, stop chan bool
 		}
 	}(logFile)
 
-	// make a new reader that consumes from topic-A, partition 0, at offset 42
+	// make a new reader
 	r := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:   brokers,
 		Topic:     topic,
@@ -127,14 +127,15 @@ func ConsumeReader(brokers []string, topic string, partition int, stop chan bool
 			return
 
 		default:
-			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 			msg, err := r.ReadMessage(ctx)
 			cancel()
-			if err != nil {
+
+			if err != nil && err != context.DeadlineExceeded {
 				logger2.Printf("Error reading message: %v\n", err)
 				continue
 			}
-			logger2.Printf("Received message from partition %d:  %s = %s\n", msg.Partition, string(msg.Key), string(msg.Value))
+			logger2.Printf("Received message from topic %v and partition %d:  %s = %s\n", msg.Topic, msg.Partition, string(msg.Key), string(msg.Value))
 		}
 	}
 
