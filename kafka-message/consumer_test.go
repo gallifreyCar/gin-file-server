@@ -92,6 +92,20 @@ func TestConsumeReader(t *testing.T) {
 			stop:      make(chan bool, 100),
 			done:      make(chan int, 100),
 		}},
+		{name: "test upload single file", args: args{
+			brokers:   []string{address2, address1},
+			topic:     "upload-file-single",
+			partition: 0,
+			stop:      make(chan bool, 100),
+			done:      make(chan int, 100),
+		}},
+		{name: "test download file", args: args{
+			brokers:   []string{address2, address1},
+			topic:     "download-file",
+			partition: 0,
+			stop:      make(chan bool, 100),
+			done:      make(chan int, 100),
+		}},
 	}
 
 	for _, tt := range tests {
