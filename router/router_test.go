@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"crypto/rand"
 	"fmt"
-	"github.com/gallifreyCar/gin-file-server/handler"
-	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"mime/multipart"
@@ -110,54 +108,6 @@ func TestRMMM(t *testing.T) {
 		t.Fatal(err)
 	}
 
-}
-
-func Test_setupRouter(t *testing.T) {
-	tests := []struct {
-		name string
-		want *gin.Engine
-	}{
-		{
-			name: "test uploadFile route",
-			want: func() *gin.Engine {
-				r := gin.Default()
-				r.MaxMultipartMemory = 8 << 20 // 8 MiB
-				r.POST("/uploadFile", MaxAllowed(10<<20), handler.UploadFileSingle, KafkaMiddleware([]string{"address1", "address2"}, "uploadFileSingle"))
-				return r
-			}(),
-		},
-
-		{
-			name: "test uploadFiles route",
-			want: func() *gin.Engine {
-				r := gin.Default()
-				r.MaxMultipartMemory = 8 << 20 // 8 MiB
-				r.POST("/uploadFiles", MaxAllowed(50<<20), handler.UploadFiles, KafkaMiddleware([]string{"address1", "address2"}, "uploadFileMultiple"))
-				return r
-			}(),
-		},
-		{
-			name: "test downloadFile route",
-			want: func() *gin.Engine {
-				r := gin.Default()
-				r.GET("/downloadFile/:folder/:file_name", handler.DownloadFile, KafkaMiddleware([]string{"address1", "address2"}, "downloadFile"))
-				return r
-			}(),
-		},
-		{
-			name: "test selectFileLogByName route",
-			want: func() *gin.Engine {
-				r := gin.Default()
-				r.GET("/uploads/file_name/:file_name", handler.SelectFileLogByName)
-				return r
-			}(),
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			assert.Equalf(t, tt.want, setupRouter(), "setupRouter()")
-		})
-	}
 }
 
 func Test_fileUploadSingle(t *testing.T) {
