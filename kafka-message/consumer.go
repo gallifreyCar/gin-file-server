@@ -3,9 +3,9 @@ package kafka_message
 import (
 	"context"
 	"fmt"
-	log2 "github.com/gallifreyCar/gin-file-server/log"
+	"github.com/gallifreyCar/gin-file-server/m-logger"
 	"github.com/segmentio/kafka-go"
-	"log"
+	"go.uber.org/zap"
 	"os"
 	"os/signal"
 	"syscall"
@@ -14,28 +14,24 @@ import (
 
 func Consume(topic string) (message string, err error) {
 
-	//set a logger
-	logFile, logger := log2.InitLogFile("gin-file-server.log", "[Consume]")
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
+	//set a zap logger
+	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[Consume]")
+	logger.Error("Fail to init zap logger", zap.Error(err))
+	defer closeFunc()
 
-			logger.Fatal(err)
-		}
-	}(logFile)
 	// to consume messages
 	partition := 0
 	address := os.Getenv("address")
 
 	conn, err := kafka.DialLeader(context.Background(), "tcp", address, topic, partition)
 	if err != nil {
-		logger.Println("failed to dial leader:", err)
+		logger.Info("Failed to dial leader:", zap.Error(err))
 		return "", err
 	}
 
 	err = conn.SetReadDeadline(time.Now().Add(10 * time.Second))
 	if err != nil {
-		logger.Println("failed to set ReadDeadline:", err)
+		logger.Info("Failed to set ReadDeadline:", zap.Error(err))
 		return "", err
 	}
 	batch := conn.ReadBatch(10e3, 1e6) // fetch 10KB min, 1MB max
@@ -53,10 +49,10 @@ func Consume(topic string) (message string, err error) {
 
 	defer func() {
 		if err := batch.Close(); err != nil {
-			logger.Println("failed to close batch:", err)
+			logger.Info("Failed to close batch:", zap.Error(err))
 		}
 		if err := conn.Close(); err != nil {
-			logger.Println("failed to close connection:", err)
+			logger.Info("Failed to close connection:", zap.Error(err))
 		}
 	}()
 	return message, nil
@@ -65,14 +61,10 @@ func Consume(topic string) (message string, err error) {
 
 func ConsumeReader(brokers []string, topic string, partition int, stop chan bool, done chan int) (err error) {
 
-	//set a logger
-	logFile, logger := log2.InitLogFile("gin-file-server.log", "[ConsumeReader]")
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			logger.Fatal(err)
-		}
-	}(logFile)
+	//set a zap logger
+	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[ConsumeReader]")
+	logger.Error("Fail to init zap logger", zap.Error(err))
+	defer closeFunc()
 
 	// make a new reader
 	r := kafka.NewReader(kafka.ReaderConfig{
@@ -85,32 +77,20 @@ func ConsumeReader(brokers []string, topic string, partition int, stop chan bool
 	})
 	err = r.SetOffset(kafka.LastOffset)
 	if err != nil {
-		logger.Println(err)
+		logger.Error("Failed to set kafka partition offset", zap.Error(err))
 		return err
 	}
 	defer func(r *kafka.Reader) {
 		err := r.Close()
 		if err != nil {
-			logger.Println(err)
+			logger.Error("Failed to close kafka reader", zap.Error(err))
 
 		}
 	}(r)
 
 	//create a file "consumerFile" and logger2 to log the topic have been consumed
-	consumerFile, err := os.OpenFile("../target/consumer/"+time.Now().Format(time.DateOnly), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		logger.Println(err)
-		return err
-	}
-	logger2 := log.New(consumerFile, "[🚄CONSUMER]", log.Ltime|log.Lshortfile)
-	logger2.SetOutput(consumerFile)
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			logger.Println(err)
-		}
-	}(consumerFile)
-
+	logger2, closeFunc := m_logger.InitLogFile("../target/consumer/"+time.Now().Format(time.DateOnly), "[🚄CONSUMING]")
+	defer closeFunc()
 	//read message from Kafka topic and log it into "consumerFile"
 	logger2.Println("Start consuming...")
 	signals := make(chan os.Signal, 1)
