@@ -3,9 +3,9 @@ package kafka_message
 import (
 	"context"
 	"errors"
-	log2 "github.com/gallifreyCar/gin-file-server/log"
+	"github.com/gallifreyCar/gin-file-server/m-logger"
 	"github.com/segmentio/kafka-go"
-
+	"go.uber.org/zap"
 	"os"
 	"time"
 )
@@ -13,29 +13,24 @@ import (
 // Produce use kafka-go Connection api, learn more:https://pkg.go.dev/github.com/segmentio/kafka-go#readme-connection
 func Produce(topic string, message []string, partition int) (err error) {
 
-	//set a logger
-	logFile, log := log2.InitLogFile("gin-file-server.log", "[Produce]")
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			log.Println(err)
-		}
-	}(logFile)
+	//set a zap logger
+	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[Produce]")
+	logger.Error("Fail to init zap logger", zap.Error(err))
+	defer closeFunc()
 
 	// to produce messages
 	address := os.Getenv("address")
 
 	conn, err := kafka.DialLeader(context.Background(), "tcp", address, topic, partition)
 	if err != nil {
-
-		log.Println("failed to dial leader:", err)
+		logger.Error("Fail to init zap logger", zap.Error(err))
 		return err
 	}
 
 	err = conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
 	if err != nil {
 
-		log.Println("failed to set WriteDeadline:", err)
+		logger.Error("Failed to set WriteDeadline", zap.Error(err))
 		return err
 	}
 
@@ -47,13 +42,13 @@ func Produce(topic string, message []string, partition int) (err error) {
 
 	if err != nil {
 
-		log.Println("failed to write messages:", err)
+		logger.Error("Failed to write messages", zap.Error(err))
 		return err
 	}
 
 	if err := conn.Close(); err != nil {
 
-		log.Println("failed to close writer:", err)
+		logger.Error("Failed to close writer", zap.Error(err))
 		return err
 	}
 
@@ -62,14 +57,10 @@ func Produce(topic string, message []string, partition int) (err error) {
 
 // ProduceWriter use kafka-go writer api, learn more:https://pkg.go.dev/github.com/segmentio/kafka-go#readme-writer
 func ProduceWriter(address []string, topic string, messages []kafka.Message) (err error) {
-	//set a logger
-	logFile, log := log2.InitLogFile("gin-file-server.log", "[ProduceWriter]")
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			log.Println(err)
-		}
-	}(logFile)
+	//set a zap logger
+	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[ProduceWriter]")
+	logger.Error("Fail to init zap logger", zap.Error(err))
+	defer closeFunc()
 
 	w := &kafka.Writer{
 		Addr:                   kafka.TCP(address...),
@@ -85,20 +76,20 @@ func ProduceWriter(address []string, topic string, messages []kafka.Message) (er
 		// attempt to create topic prior to publishing the message
 		err = w.WriteMessages(ctx, messages...)
 		if errors.Is(err, kafka.LeaderNotAvailable) || errors.Is(err, context.DeadlineExceeded) {
-			log.Printf("error creating topic: %v", err)
+			logger.Error("Failed to create topic", zap.Error(err))
 			time.Sleep(time.Millisecond * 250)
 			continue
 		}
 
 		if err != nil {
-			log.Printf("unexpected error %v", err)
+			logger.Error("Unexpected error ", zap.Error(err))
 			return err
 		}
 		break
 	}
 
 	if err := w.Close(); err != nil {
-		log.Println("failed to close writer:", err)
+		logger.Error("Failed to close writer:", zap.Error(err))
 		return err
 	}
 	return nil
