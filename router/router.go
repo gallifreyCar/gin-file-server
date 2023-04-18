@@ -3,10 +3,11 @@ package router
 import (
 	"encoding/json"
 	"github.com/gallifreyCar/gin-file-server/handler"
-	kafka_message "github.com/gallifreyCar/gin-file-server/kafka-message"
-	log2 "github.com/gallifreyCar/gin-file-server/log"
+	kafkaMessage "github.com/gallifreyCar/gin-file-server/kafka-message"
+	"github.com/gallifreyCar/gin-file-server/m-logger"
 	"github.com/gin-gonic/gin"
 	"github.com/segmentio/kafka-go"
+	"go.uber.org/zap"
 	"log"
 	"net/http"
 	"os"
@@ -18,14 +19,10 @@ func KafkaMiddleware(address []string, topic string) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 
-		//set a logger
-		logFile, logger := log2.InitLogFile("gin-file-server.log", "[KafkaMiddleware]")
-		defer func(file *os.File) {
-			err := file.Close()
-			if err != nil {
-				logger.Println(err)
-			}
-		}(logFile)
+		//set a zap logger
+		logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[KafkaMiddleware]")
+		logger.Error("Fail to init zap logger", zap.Error(err))
+		defer closeFunc()
 
 		method := c.Request.Method
 		kafkaMessages := make([]kafka.Message, 0)
@@ -61,21 +58,19 @@ func KafkaMiddleware(address []string, topic string) gin.HandlerFunc {
 				fieldName = c.DefaultPostForm("fieldName", "file")
 			}
 
-			logger.Println(fieldName)
 			// Parse the multipart form
 			forms := c.Request.MultipartForm
-			logger.Println(forms)
+
 			// Get the uploaded files based on the specified field name
 			files := forms.File[fieldName]
 			for _, file := range files {
-				logger.Println(file.Filename)
-				logger.Println(file.Header)
+
 				//Try to open the file.
 				_, err := file.Open()
 				if err != nil {
 					// If an error occurred, return a bad request response.
 					err = c.AbortWithError(http.StatusBadRequest, err)
-					logger.Println(err)
+					logger.Error("Fail to open file", zap.Error(err), zap.Int("statusCode", http.StatusBadRequest))
 					return
 				}
 
@@ -102,12 +97,14 @@ func KafkaMiddleware(address []string, topic string) gin.HandlerFunc {
 		}
 
 		// Write the message to Kafka.
-		err := kafka_message.ProduceWriter(address, topic, kafkaMessages)
+		err = kafkaMessage.ProduceWriter(address, topic, kafkaMessages)
 		if err != nil {
 			err = c.AbortWithError(http.StatusInternalServerError, err)
-			logger.Println(err)
+			logger.Error("Fail to write the message to Kafka", zap.Error(err), zap.Int("statusCode", http.StatusInternalServerError))
 			return
 		}
+
+		logger.Info("Write the message to Kafka success!", zap.String("topic", topic))
 		// Continue processing the request.
 		c.Next()
 	}
@@ -115,19 +112,29 @@ func KafkaMiddleware(address []string, topic string) gin.HandlerFunc {
 
 // MaxAllowed Middleware function to set a size limit on the uploaded files
 func MaxAllowed(n int64) gin.HandlerFunc {
+	//set a zap logger
+	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[MaxAllowed]")
+	logger.Error("Fail to init zap logger", zap.Error(err))
+	defer closeFunc()
+
 	maxBytes := n
 	return func(c *gin.Context) {
 		c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, maxBytes)
 		if err := c.Request.ParseMultipartForm(maxBytes); err != nil {
 			if err.Error() == "http: request body too large" {
 				c.AbortWithStatus(http.StatusRequestEntityTooLarge)
+				logger.Error("Upload File is too large", zap.Error(err), zap.Int("statusCode", http.StatusRequestEntityTooLarge), zap.Int64("maxBytes", maxBytes))
 				return
 			}
 			c.AbortWithStatus(http.StatusBadRequest)
+			logger.Error("Fail to parse multipart form in max bytes limit", zap.Error(err), zap.Int("statusCode", http.StatusBadRequest), zap.Int64("maxBytes", maxBytes))
 			return
 		}
 		c.Next()
+		logger.Info("File size check success!", zap.Int64("maxBytes", maxBytes))
+
 	}
+
 }
 
 func setupRouter() *gin.Engine {
