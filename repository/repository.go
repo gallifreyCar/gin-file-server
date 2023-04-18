@@ -1,25 +1,22 @@
 package repository
 
 import (
-	log2 "github.com/gallifreyCar/gin-file-server/log"
+	"github.com/gallifreyCar/gin-file-server/m-logger"
 	"github.com/gallifreyCar/gin-file-server/model"
 	mysqlDriver "github.com/go-sql-driver/mysql"
+	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"log"
 	"os"
 )
 
 func GetDataBase() (db *gorm.DB, err error) {
 
-	//set dataBase.log
-	file, log := log2.InitLogFile("gin-file-server.log", "[DataBase]")
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-
-			log.Fatal(err)
-		}
-	}(file)
+	//set database zap logger
+	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[GetDataBase]")
+	logger.Error("Fail to init zap logger", zap.Error(err))
+	defer closeFunc()
 
 	// Capture connection properties.
 	cfg := mysqlDriver.Config{
@@ -56,15 +53,10 @@ func GetDataBase() (db *gorm.DB, err error) {
 }
 func InsertFileLog(savePath, fileName, userAgent, fileType string, fileSize int64, db *gorm.DB) (ID uint, RowsAffected int64, err error) {
 
-	//set dataBase.logger
-	file, logger := log2.InitLogFile("gin-file-server.log", "[InsertFile]")
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-
-			logger.Fatal(err)
-		}
-	}(file)
+	//set a zap logger
+	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[InsertFileLog]")
+	logger.Error("Fail to init zap logger", zap.Error(err))
+	defer closeFunc()
 
 	//create record insert into database
 	fileLog := model.UploadFileLog{
@@ -76,32 +68,28 @@ func InsertFileLog(savePath, fileName, userAgent, fileType string, fileSize int6
 	}
 	result := db.Create(&fileLog)
 	if result.Error == nil {
-		logger.Printf("ID:%v,RowsAffected:%v", fileLog.ID, result.RowsAffected)
+		logger.Error("Fail to create file log in repository", zap.Error(result.Error))
 	}
 
+	logger.Info("Insert file log success!", zap.Uint("fileLog.ID", fileLog.ID), zap.Int64("row affected", result.RowsAffected))
 	return fileLog.ID, result.RowsAffected, result.Error
 
 }
 func SelectFileLog(fileName string, db *gorm.DB) (model.UploadFileLog, error) {
 
-	//set dataBase.logger
-	file, logger := log2.InitLogFile("gin-file-server.log", "[selectFile]")
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-
-			logger.Fatal(err)
-		}
-	}(file)
+	//set a zap logger
+	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[SelectFileLog]")
+	logger.Error("Fail to init zap logger", zap.Error(err))
+	defer closeFunc()
 
 	var fileLog model.UploadFileLog
 	result := db.Where(&model.UploadFileLog{FileName: fileName}).Last(&fileLog)
 
 	if result.Error != nil {
-		logger.Println(result.Error)
+		logger.Error("File to use gorm select file log by file name", zap.Error(result.Error))
 		return fileLog, result.Error
 	}
 
-	logger.Printf("ID: %v,RowsAffected: %v", fileLog.ID, result.RowsAffected)
+	logger.Info("Select file by file name success!", zap.Uint("fileLog.ID", fileLog.ID))
 	return fileLog, result.Error
 }
