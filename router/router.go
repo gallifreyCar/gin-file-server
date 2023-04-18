@@ -74,7 +74,8 @@ func KafkaMiddleware(address []string, topic string) gin.HandlerFunc {
 				_, err := file.Open()
 				if err != nil {
 					// If an error occurred, return a bad request response.
-					c.AbortWithError(http.StatusBadRequest, err)
+					err = c.AbortWithError(http.StatusBadRequest, err)
+					logger.Println(err)
 					return
 				}
 
@@ -103,7 +104,8 @@ func KafkaMiddleware(address []string, topic string) gin.HandlerFunc {
 		// Write the message to Kafka.
 		err := kafka_message.ProduceWriter(address, topic, kafkaMessages)
 		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
+			err = c.AbortWithError(http.StatusInternalServerError, err)
+			logger.Println(err)
 			return
 		}
 		// Continue processing the request.
