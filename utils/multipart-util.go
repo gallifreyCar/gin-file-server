@@ -13,8 +13,10 @@ import (
 func CreateUploadBody(field string, files []*os.File) (*bytes.Buffer, error) {
 
 	// Set a zap logger
-	logger, err, closeFunc := mLogger.InitZapLogger("util"+time.Now().Format(time.DateOnly)+".log", "[CreateUploadBody]")
-	logger.Error("Failed to init zap logger", zap.Error(err))
+	logger, err, closeFunc := mLogger.InitZapLogger("util_"+time.Now().Format(time.DateOnly)+".log", "[CreateUploadBody]")
+	if err != nil {
+		logger.Error("Failed to init zap logger", zap.Error(err))
+	}
 	defer closeFunc()
 
 	// Create a new request with the files as the body of the request
