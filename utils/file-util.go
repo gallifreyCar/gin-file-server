@@ -6,6 +6,7 @@ import (
 	mLogger "github.com/gallifreyCar/gin-file-server/m-logger"
 	"go.uber.org/zap"
 	"os"
+	"time"
 )
 
 func CreateTempFiles(fileNum int, fileSize int64, suffix string) (files []*os.File, close func(), err error) {
@@ -15,7 +16,7 @@ func CreateTempFiles(fileNum int, fileSize int64, suffix string) (files []*os.Fi
 	}
 
 	// Set a zap logger
-	logger, err, closeFunc := mLogger.InitZapLogger("gin-file-server.log", "[CreateFiles]")
+	logger, err, closeFunc := mLogger.InitZapLogger("util_"+time.Now().Format(time.DateOnly)+".log", "[CreateFiles]")
 	logger.Error("Failed to init zap logger", zap.Error(err))
 	defer closeFunc()
 
