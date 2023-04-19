@@ -26,7 +26,7 @@ func setupRouter() *gin.Engine {
 func TestUploadFileSingle(t *testing.T) {
 
 	// Create a temporary file to upload
-	files, clean, err := utils.CreateTempFiles(1, 1024*1024*2, "example*.txt")
+	files, clean, err := utils.CreateTempFiles(1, 1024*2, "example*.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -72,7 +72,7 @@ func TestUploadFiles(t *testing.T) {
 	fieldName := "testfiles"
 
 	// Create temporary files to upload
-	files, clean, err := utils.CreateTempFiles(2, 1024*1024*2, "example*.txt")
+	files, clean, err := utils.CreateTempFiles(2, 1024*1, "example*.txt")
 	if err != nil {
 		t.Fatal(err)
 	}

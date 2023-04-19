@@ -21,7 +21,7 @@ func TestCreateTempFiles(t *testing.T) {
 			name: "test create a 10kb file",
 			args: args{
 				fileNum:  1,
-				fileSize: 1024 * 1024 * 10,
+				fileSize: 1024 * 10,
 				suffix:   "example*.txt",
 			},
 			wantErr:      false,
@@ -31,7 +31,7 @@ func TestCreateTempFiles(t *testing.T) {
 			name: "test create 3 5kb files",
 			args: args{
 				fileNum:  3,
-				fileSize: 1024 * 1024 * 5,
+				fileSize: 1024 * 5,
 				suffix:   "example*.txt",
 			},
 			wantErr:      false,
