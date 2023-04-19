@@ -14,7 +14,7 @@ import (
 func Produce(topic string, message []string, partition int) (err error) {
 
 	//set a zap logger
-	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[Produce]")
+	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server_"+time.Now().Format("20060102")+".log", "[Produce]")
 	if err != nil {
 		logger.Error("Failed to init zap logger", zap.Error(err))
 	}
@@ -62,7 +62,7 @@ func Produce(topic string, message []string, partition int) (err error) {
 // ProduceWriter use kafka-go writer api, learn more:https://pkg.go.dev/github.com/segmentio/kafka-go#readme-writer
 func ProduceWriter(address []string, topic string, messages []kafka.Message) (err error) {
 	//set a zap logger
-	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[ProduceWriter]")
+	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server_"+time.Now().Format("20060102")+".log", "[ProduceWriter]")
 	if err != nil {
 		logger.Error("Failed to init zap logger", zap.Error(err))
 	}

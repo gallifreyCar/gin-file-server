@@ -15,7 +15,7 @@ import (
 func Consume(topic string) (message string, err error) {
 
 	//set a zap logger
-	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[Consume]")
+	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server_"+time.Now().Format("20060102")+".log", "[Consume]")
 	if err != nil {
 		logger.Error("Failed to init zap logger", zap.Error(err))
 	}
@@ -64,7 +64,7 @@ func Consume(topic string) (message string, err error) {
 func ConsumeReader(brokers []string, topic string, partition int, stop chan bool, done chan int) (err error) {
 
 	//set a zap logger
-	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[ConsumeReader]")
+	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server_"+time.Now().Format("20060102")+".log", "[ConsumeReader]")
 	if err != nil {
 		logger.Error("Failed to init zap logger", zap.Error(err))
 	}

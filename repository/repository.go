@@ -8,6 +8,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"os"
+	"time"
 )
 
 func GetDataBase() (db *gorm.DB, err error) {
@@ -57,7 +58,7 @@ func GetDataBase() (db *gorm.DB, err error) {
 func InsertFileLog(savePath, fileName, userAgent, fileType string, fileSize int64, db *gorm.DB) (ID uint, RowsAffected int64, err error) {
 
 	//set a zap logger
-	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[InsertFileLog]")
+	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server_"+time.Now().Format("20060102")+".log", "[InsertFileLog]")
 	if err != nil {
 		logger.Error("Failed to init zap logger", zap.Error(err))
 	}
@@ -84,7 +85,7 @@ func InsertFileLog(savePath, fileName, userAgent, fileType string, fileSize int6
 func SelectFileLog(fileName string, db *gorm.DB) (model.UploadFileLog, error) {
 
 	//set a zap logger
-	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[SelectFileLog]")
+	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server_"+time.Now().Format("20060102")+".log", "[SelectFileLog]")
 	if err != nil {
 		logger.Error("Failed to init zap logger", zap.Error(err))
 	}

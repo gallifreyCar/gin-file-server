@@ -20,7 +20,7 @@ func KafkaMiddleware(address []string, topic string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		//set a zap logger
-		logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[KafkaMiddleware]")
+		logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server_"+time.Now().Format("20060102")+".log", "[KafkaMiddleware]")
 		if err != nil {
 			logger.Error("Failed to init zap logger", zap.Error(err))
 		}
@@ -115,7 +115,7 @@ func KafkaMiddleware(address []string, topic string) gin.HandlerFunc {
 // MaxAllowed Middleware function to set a size limit on the uploaded files
 func MaxAllowed(n int64) gin.HandlerFunc {
 	//set a zap logger
-	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[MaxAllowed]")
+	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server_"+time.Now().Format("20060102")+".log", "[MaxAllowed]")
 	if err != nil {
 		logger.Error("Failed to init zap logger", zap.Error(err))
 	}
