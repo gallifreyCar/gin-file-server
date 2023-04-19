@@ -7,15 +7,16 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"log"
 	"os"
 )
 
 func GetDataBase() (db *gorm.DB, err error) {
 
 	//set database zap logger
-	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[GetDataBase]")
-	logger.Error("Fail to init zap logger", zap.Error(err))
+	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server"+".log", "[GetDataBase]")
+	if err != nil {
+		logger.Error("Failed to init zap logger", zap.Error(err))
+	}
 	defer closeFunc()
 
 	// Capture connection properties.
@@ -45,17 +46,22 @@ func GetDataBase() (db *gorm.DB, err error) {
 
 	db, err = gorm.Open(mysql.Open(cfg.FormatDSN()), &gorm.Config{})
 	if err != nil {
-		log.Println(err)
-	} else {
-		log.Println(logCfg.FormatDSN())
+		logger.Error("Failed to open database", zap.Error(err))
+		return nil, err
 	}
+
+	logger.Info("Get database success!", zap.String("logCfg", logCfg.FormatDSN()))
+
 	return db, err
 }
 func InsertFileLog(savePath, fileName, userAgent, fileType string, fileSize int64, db *gorm.DB) (ID uint, RowsAffected int64, err error) {
 
 	//set a zap logger
 	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[InsertFileLog]")
-	logger.Error("Fail to init zap logger", zap.Error(err))
+	if err != nil {
+		logger.Error("Failed to init zap logger", zap.Error(err))
+	}
+
 	defer closeFunc()
 
 	//create record insert into database
@@ -79,7 +85,10 @@ func SelectFileLog(fileName string, db *gorm.DB) (model.UploadFileLog, error) {
 
 	//set a zap logger
 	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[SelectFileLog]")
-	logger.Error("Fail to init zap logger", zap.Error(err))
+	if err != nil {
+		logger.Error("Failed to init zap logger", zap.Error(err))
+	}
+
 	defer closeFunc()
 
 	var fileLog model.UploadFileLog

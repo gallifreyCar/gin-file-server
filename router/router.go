@@ -21,7 +21,9 @@ func KafkaMiddleware(address []string, topic string) gin.HandlerFunc {
 
 		//set a zap logger
 		logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[KafkaMiddleware]")
-		logger.Error("Fail to init zap logger", zap.Error(err))
+		if err != nil {
+			logger.Error("Failed to init zap logger", zap.Error(err))
+		}
 		defer closeFunc()
 
 		method := c.Request.Method
@@ -114,7 +116,9 @@ func KafkaMiddleware(address []string, topic string) gin.HandlerFunc {
 func MaxAllowed(n int64) gin.HandlerFunc {
 	//set a zap logger
 	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[MaxAllowed]")
-	logger.Error("Fail to init zap logger", zap.Error(err))
+	if err != nil {
+		logger.Error("Failed to init zap logger", zap.Error(err))
+	}
 	defer closeFunc()
 
 	maxBytes := n

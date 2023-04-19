@@ -16,6 +16,9 @@ func UploadFileSingle(c *gin.Context) {
 
 	//set handle zap logger
 	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[UploadFileSingle]")
+	if err != nil {
+		logger.Error("Failed to init zap logger", zap.Error(err))
+	}
 	defer closeFunc()
 
 	// Get the field name for file uploads from the request
@@ -97,7 +100,9 @@ func DownloadFile(c *gin.Context) {
 
 	//set handle zap logger
 	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[DownloadFile]")
-	logger.Error("Fail to init zap logger", zap.Error(err))
+	if err != nil {
+		logger.Error("Failed to init zap logger", zap.Error(err))
+	}
 	defer closeFunc()
 
 	// Get url param
@@ -130,7 +135,9 @@ func DownloadFile(c *gin.Context) {
 func SelectFileLogByName(c *gin.Context) {
 	//set handle  zap logger
 	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[SelectFileLogByName]")
-	logger.Error("Fail to init zap logger", zap.Error(err))
+	if err != nil {
+		logger.Error("Failed to init zap logger", zap.Error(err))
+	}
 	defer closeFunc()
 	// Get url param
 	fileName := c.Param("file_name")

@@ -15,7 +15,9 @@ func Produce(topic string, message []string, partition int) (err error) {
 
 	//set a zap logger
 	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[Produce]")
-	logger.Error("Fail to init zap logger", zap.Error(err))
+	if err != nil {
+		logger.Error("Failed to init zap logger", zap.Error(err))
+	}
 	defer closeFunc()
 
 	// to produce messages
@@ -23,7 +25,9 @@ func Produce(topic string, message []string, partition int) (err error) {
 
 	conn, err := kafka.DialLeader(context.Background(), "tcp", address, topic, partition)
 	if err != nil {
-		logger.Error("Fail to init zap logger", zap.Error(err))
+		if err != nil {
+			logger.Error("Failed to init zap logger", zap.Error(err))
+		}
 		return err
 	}
 
@@ -59,7 +63,9 @@ func Produce(topic string, message []string, partition int) (err error) {
 func ProduceWriter(address []string, topic string, messages []kafka.Message) (err error) {
 	//set a zap logger
 	logger, err, closeFunc := m_logger.InitZapLogger("gin-file-server.log", "[ProduceWriter]")
-	logger.Error("Fail to init zap logger", zap.Error(err))
+	if err != nil {
+		logger.Error("Failed to init zap logger", zap.Error(err))
+	}
 	defer closeFunc()
 
 	w := &kafka.Writer{
