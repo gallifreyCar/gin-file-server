@@ -10,8 +10,8 @@ import (
 
 func CreateTempFiles(fileNum int, fileSize int64, suffix string) (files []*os.File, close func(), err error) {
 	// Validate args
-	if fileNum <= 0 {
-		return nil, nil, errors.New("fileNum must be greater than 0")
+	if fileNum <= 0 || fileSize <= 0 {
+		return nil, nil, errors.New("invalid arguments")
 	}
 
 	// Set a zap logger
