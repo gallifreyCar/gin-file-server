@@ -1,17 +1,14 @@
 package handler
 
 import (
-	"bytes"
 	"github.com/gallifreyCar/gin-file-server/utils"
 	"github.com/gin-gonic/gin"
 	"io"
-	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"os"
 	"path"
-	"path/filepath"
 	"testing"
 )
 
@@ -31,22 +28,10 @@ func TestUploadFileSingle(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer clean()
-	file := files[0]
 
 	// Create a new request with the file as the body of the request
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	part, err := writer.CreateFormFile("file", filepath.Base(file.Name()))
+	body, writer, err := utils.CreateUploadBody("file", files)
 	if err != nil {
-		t.Fatal(err)
-	}
-	if _, err = file.Seek(0, 0); err != nil {
-		t.Fatal(err)
-	}
-	if _, err = io.Copy(part, file); err != nil {
-		t.Fatal(err)
-	}
-	if err = writer.Close(); err != nil {
 		t.Fatal(err)
 	}
 
@@ -69,7 +54,7 @@ func TestUploadFileSingle(t *testing.T) {
 }
 
 func TestUploadFiles(t *testing.T) {
-	fieldName := "testfiles"
+	fieldName := "testFiles"
 
 	// Create temporary files to upload
 	files, clean, err := utils.CreateTempFiles(2, 1024*1, "example*.txt")
@@ -78,23 +63,9 @@ func TestUploadFiles(t *testing.T) {
 	}
 	defer clean()
 
-	// Create a new request with the files as the body of the request
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	for _, file := range files {
-
-		part, err := writer.CreateFormFile(fieldName, filepath.Base(file.Name()))
-		if err != nil {
-			t.Fatal(err)
-		}
-		if _, err = file.Seek(0, 0); err != nil {
-			t.Fatal(err)
-		}
-		if _, err = io.Copy(part, file); err != nil {
-			t.Fatal(err)
-		}
-	}
-	if err := writer.Close(); err != nil {
+	// Create a new request with the file as the body of the request
+	body, writer, err := utils.CreateUploadBody(fieldName, files)
+	if err != nil {
 		t.Fatal(err)
 	}
 
