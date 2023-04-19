@@ -3,7 +3,7 @@ package router
 import (
 	"bytes"
 	"crypto/rand"
-	"fmt"
+	"github.com/gallifreyCar/gin-file-server/utils"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"mime/multipart"
@@ -15,8 +15,6 @@ import (
 	"path/filepath"
 	"testing"
 )
-
-//todo Extract code to generate files.
 
 func TestSetupRouter_old(t *testing.T) {
 
@@ -113,22 +111,12 @@ func TestRMMM(t *testing.T) {
 func Test_fileUploadSingle(t *testing.T) {
 
 	// Create a temporary file to upload
-	file, err := os.CreateTemp("", "example*.txt")
+	files, clean, err := utils.CreateTempFiles(1, 1024*1024*2, "example*.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer func() {
-		err = file.Close()
-		if err != nil {
-			t.Fatal(err)
-		}
-	}()
-
-	// Write some data to the file
-	_, err = file.WriteString("testing file upload")
-	if err != nil {
-		t.Fatal(err)
-	}
+	defer clean()
+	file := files[0]
 
 	// Create a new request with the file as the body of the request
 	body := &bytes.Buffer{}
@@ -137,26 +125,17 @@ func Test_fileUploadSingle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	// Create a cleanup function to remove the temporary file after the test finishes
-	cleanup := func() {
-		err := os.Remove(file.Name())
-		if err != nil {
-			t.Fatal(err)
-		}
-	}
 	if _, err = file.Seek(0, 0); err != nil {
-		cleanup()
 		t.Fatal(err)
 	}
 	if _, err = io.Copy(part, file); err != nil {
-		cleanup()
+
 		t.Fatal(err)
 	}
 	if err = writer.Close(); err != nil {
-		cleanup()
 		t.Fatal(err)
 	}
+
 	// Create a test router
 	router := setupRouter()
 	// Create a response recorder to record the response
@@ -169,7 +148,6 @@ func Test_fileUploadSingle(t *testing.T) {
 
 	// Check the response status code
 	if w.Code != http.StatusOK {
-		cleanup()
 		t.Errorf("unexpected status code %d", w.Code)
 		return
 	}
@@ -180,36 +158,11 @@ func Test_fileUploadMultiple(t *testing.T) {
 	fieldName := "testfiles"
 
 	// Create temporary files to upload
-	var files []*os.File
-	for i := 0; i < 3; i++ {
-		tempFiles, err := os.CreateTemp("", "example*.txt")
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		// Write some data to the file
-		_, err = tempFiles.WriteString(fmt.Sprintf("testing file upload %v", i))
-
-		if err != nil {
-			t.Fatal(err)
-		}
-		files = append(files, tempFiles)
+	files, clean, err := utils.CreateTempFiles(2, 1024*1024*2, "example*.txt")
+	if err != nil {
+		t.Fatal(err)
 	}
-
-	//Remove files from os
-	defer func() {
-
-		for _, file := range files {
-			err := file.Close()
-			if err != nil {
-				t.Fatal(err)
-			}
-			err = os.Remove(file.Name())
-			if err != nil {
-				t.Fatal(err)
-			}
-		}
-	}()
+	defer clean()
 
 	// Create a new request with the files as the body of the request
 	body := &bytes.Buffer{}
@@ -220,7 +173,6 @@ func Test_fileUploadMultiple(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-
 		if _, err = file.Seek(0, 0); err != nil {
 			t.Fatal(err)
 		}
