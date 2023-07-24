@@ -141,7 +141,7 @@ func MaxAllowed(n int64) gin.HandlerFunc {
 
 }
 
-func setupRouter() *gin.Engine {
+func SetupRouter() *gin.Engine {
 
 	address1 := os.Getenv("address1")
 	address2 := os.Getenv("address2")
@@ -155,5 +155,6 @@ func setupRouter() *gin.Engine {
 	r.POST("/uploadFiles", MaxAllowed(50<<20), handler.UploadFiles, KafkaMiddleware(address, "upload-file-multiple"))
 	r.GET("/downloadFile/:folder/:file_name", handler.DownloadFile, KafkaMiddleware(address, "download-file"))
 	r.GET("/uploads/file_name/:file_name", handler.SelectFileLogByName)
+	r.Use()
 	return r
 }

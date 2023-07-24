@@ -33,7 +33,7 @@ func TestSetupRouter_old(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			router := setupRouter()
+			router := SetupRouter()
 			w := httptest.NewRecorder()
 			resp, err := http.NewRequest(tc.method, tc.endpoint, nil)
 			resp.Header.Set("Content-Type", tc.contendType)
@@ -88,7 +88,7 @@ func TestRMMM(t *testing.T) {
 	}
 
 	// Create a test router
-	router := setupRouter()
+	router := SetupRouter()
 	// Create a response recorder to record the response
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/uploadFile", body)
@@ -124,7 +124,7 @@ func Test_fileUploadSingle(t *testing.T) {
 	}
 
 	// Create a test router
-	router := setupRouter()
+	router := SetupRouter()
 	// Create a response recorder to record the response
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/uploadFile", body)
@@ -158,7 +158,7 @@ func Test_fileUploadMultiple(t *testing.T) {
 	}
 
 	// Create a test router
-	router := setupRouter()
+	router := SetupRouter()
 	// Create a response recorder to record the response
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/uploadFiles", body)
@@ -188,7 +188,7 @@ func TestDownloadFile(t *testing.T) {
 
 func downloadAndSave(folder, fileName string, t *testing.T) {
 	// Create a test router
-	router := setupRouter()
+	router := SetupRouter()
 	// Create a response recorder to record the response
 	w := httptest.NewRecorder()
 	requestUrl := path.Join("/downloadFile", folder, fileName)

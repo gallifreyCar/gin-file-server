@@ -28,14 +28,11 @@ var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "gin-file-server",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:   "ggfs-cli",
+	Short: "A simple file server built with Gin framework",
+	Long: `ggfs(go-gin-file-server) is a simple file server built with Gin framework.
+It features file uploads, downloads, as well as tracking of upload history in MySQL using GORM. 
+Event notification using Kafka-go and logging with Zap are also included.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
